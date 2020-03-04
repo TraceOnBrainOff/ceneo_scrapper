@@ -1,15 +1,12 @@
-# ceneo_scrapper
-
-Step 1 - Pobieranie danych pojedyńczej opinii
-======
-- Opinia
+## Etap 1 - pobranie składowych pojedynczej opinii
+- opinia
 - identyfikator
 - autor
 - rekomendacja
 - gwiazdki
 - potwierdzona zakupem
-- data zakupu
 - data wystawienia
+- data zakupu
 - przydatna
 - nieprzydatna
 - treść
