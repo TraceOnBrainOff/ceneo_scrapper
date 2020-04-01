@@ -7,55 +7,40 @@ from bs4 import BeautifulSoup
 url_prefix = "https://www.ceneo.pl"
 url_postfix = "/45002653#tab=reviews"
 
+def extractData(opinion, tag, cl, child=None):
+    try:
+        if child:
+            return opinion.find(tag, cl).find(child).get_text().strip()
+        else:
+            return opinion.find(tag, cl).get_text().strip()
+    except:
+        return None
+
 class Opinion:
     def __init__(self, opinion):
         try:
-            try:
-                summary = opinion.find("div", "product-review-summary").find("em").string #volotile NoneType
-            except:
-                summary = None
-            try:
-                purchased = opinion.find("div", "product-review-pz").find("em").string #volotile NoneType
-            except AttributeError:
-                purchased = None
-           
             opinion_id = opinion["data-entry-id"]
-            author = opinion.find("div", "reviewer-name-line").string
-            stars = opinion.find("span", "review-score-count").string
-            useful = opinion.find("button", "vote-yes").find("span").string
-            useless = opinion.find("button", "vote-no").find("span").string
-            content = opinion.find("p", "product-review-body").get_text()
             dates = opinion.find("span", "review-time").find_all("time")
             review_date = dates.pop(0)["datetime"]
             try:
                 purchase_date = dates.pop(0)["datetime"]
             except IndexError:
                 purchase_date = None
-
-            try:
-                pros = opinion.find("div", "pros-cell").find("ul").get_text()
-            except AttributeError:
-                pros = None
-            
-            try:
-                cons = opinion.find("div", "cons-cell").find("ul").get_text()
-            except AttributeError:
-                cons = None
             
             self.opinionId = opinion_id
             self.opinionData = {
                 "opinion_id": opinion_id,
-                "summary": summary,
-                "purchased": purchased,
-                "author": author,
-                "stars": stars,
-                "useful": useful,
-                "useless": useless,
-                "content": content,
+                "summary": extractData(opinion, "div", "product-review-summary", 'em'),
+                "purchased": extractData(opinion, "div", "product-review-pz", 'em')=="Opinia potwierdzona zakupem",
+                "author": extractData(opinion, "div", "reviewer-name-line"),
+                "stars": extractData(opinion, "span", "review-score-count"),
+                "useful": extractData(opinion, "button", "vote-yes", "span"),
+                "useless": extractData(opinion, "button", "vote-no", "span"),
+                "content": extractData(opinion, "p", "product-review-body"),
                 "review_date": review_date,
                 "purchase_date": purchase_date,
-                "pros": pros,
-                "cons": cons
+                "pros": extractData(opinion, "div", "pros-cell", "ul"),
+                "cons": extractData(opinion, "div", "cons-cell", "ul")
             }
             #print("Got all parameters for "+self.opinionId)
         except Exception as err:
