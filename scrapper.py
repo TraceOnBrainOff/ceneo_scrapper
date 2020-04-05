@@ -52,9 +52,9 @@ class Opinion:
         return self.opinionData
 
 class Extractor:
-    def __init__(self, url_postfix):
+    def __init__(self, product_id):
         self.url_prefix = "https://www.ceneo.pl"
-        self.url_postfix = "/"+url_postfix+"#tab=reviews"
+        self.url_postfix = "/"+product_id+"#tab=reviews"
         self.URL = self.url_prefix + self.url_postfix
         self.productName = None
         self.opinions = []
