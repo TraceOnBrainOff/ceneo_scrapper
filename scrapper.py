@@ -53,6 +53,7 @@ class Opinion:
 
 class Extractor:
     def __init__(self, product_id):
+        self.id = product_id
         self.url_prefix = "https://www.ceneo.pl"
         self.url_postfix = "/"+product_id+"#tab=reviews"
         self.URL = self.url_prefix + self.url_postfix
@@ -84,14 +85,14 @@ class Extractor:
             return False
         return True
     def saveData(self):
-        with open('opinions.json', 'w', encoding="utf-8") as fp:
+        with open('opinions_json/'+self.id+'.json', 'w', encoding="utf-8") as fp:
             json.dump({
                 "productName": self.productName,
                 "errors": self.abnormalStatus,
                 "opinions": self.opinions
             }, fp, sort_keys=True, indent=4, ensure_ascii=False)
     def saveError(self, er):
-        with open('opinions.json', 'w', encoding="utf-8") as fp:
+        with open('opinions_json/'+self.id+'.json', 'w', encoding="utf-8") as fp:
             json.dump({
                 "productName": "None",
                 "errors": [er],
