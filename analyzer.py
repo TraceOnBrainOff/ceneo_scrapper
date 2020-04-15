@@ -29,3 +29,5 @@ pros = opinions['pros'].count()
 cons = opinions['cons'].count()
 purchased = opinions['purchased'].sum()
 print(stars_average, pros, cons, purchased)
+
+stars_purchased = pd.crosstab(opinions['stars'], opinions['purchased'])
