@@ -8,7 +8,7 @@ class ProductForm(FlaskForm):
         validators=[
             DataRequired("Musisz podać kod produktu!"),
             Length(min=8, max=8, message="Kod produktu musi mieć 8 znaków!"),
-            Regexp("^[0-9]{8}$", message="Kod produktu może zawierać tyko cyfry!")
+            Regexp("^[0-9]+$", message="Kod produktu może zawierać tyko cyfry!")
         ]
     )
     submit = SubmitField("Pobierz")
