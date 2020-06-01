@@ -1,4 +1,3 @@
-from flask import Flask
 #import bibliotek
 from flask import Flask
 
