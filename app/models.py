@@ -3,17 +3,26 @@ import requests
 from bs4 import BeautifulSoup
 import textwrap
 import json
-from utils import extract_element, remove_whitespaces
+from app import app
+from app.utils import extract_element, remove_whitespaces
+# from utils import extract_element, remove_whitespaces
 
 class Product:
     def __init__(self, product_id = None, name = None, opinions = []):
         self.product_id = product_id
         self.name = name
         self.opinions = opinions
+    
     def __str__(self):
-        return f'Product id: {self.product_id}\nName: {self.name}\nOpinions:\n'+"\n".join(textwrap.indent(str(opinion),"    ") for opinion in self.opinions)
-    def __repr__(self):
-        pass
+        return f'Product id: {self.product_id}\nName: {self.name}\nOpinions:\n'+"\n\n".join(textwrap.indent(str(opinion),"    ") for opinion in self.opinions)
+    
+    def __dict__(self):
+        return {
+            "product_id": self.product_id,
+            "name": self.name,
+            "opinions": [opinion.__dict__() for opinion in self.opinions]
+        }
+    
     def extract_product(self):
         url_prefix = "https://www.ceneo.pl"
         url_postfix = "#tab=reviews"
@@ -44,10 +53,20 @@ class Product:
                     url = url_prefix+page_tree.find("a", "pagination__next")["href"]
                 except TypeError:
                     url = None
+    
     def save_product(self):
-        with open("./opinions_json/"+self.product_id+'.json', 'w', encoding="utf-8") as fp:
-            json.dump(self.opinions, fp, ensure_ascii=False, indent=4, separators=(',', ': '))
+        with open("app/opinions_json/"+self.product_id+'.json', 'w', encoding="utf-8") as fp:
+            json.dump(self.__dict__(), fp, ensure_ascii=False, indent=4, separators=(',', ': '))
 
+    def read_product(self):
+        with open("app/opinions_json/"+self.product_id+'.json', 'r', encoding="utf-8") as fp:
+            pr = json.load(fp)
+        self.name = pr['name']
+        opinions = pr['opinions']
+        for opinion in opinions:
+            op = Opinion(**opinion)
+            self.opinions.append(op)
+            
 class Opinion:
     #słownik z składowymi opinii i ich selektorami
     tags = {
@@ -75,10 +94,20 @@ class Opinion:
         self.purchased = purchased
         self.purchase_date = purchase_date
         self.review_date = review_date
+    
     def __str__(self):
-        return f'Opinion id: {self.opinion_id}\nAuthor: {self.author}\nStars: {self.stars}\nZalety: {self.pros}\n'
-    def __repr__(self):
-        pass
+        return '\n'.join(key+': '+('' if getattr(self,key) is None else str(getattr(self,key))) for key in self.__dict__().keys())
+    
+    def __dict__(self):
+        features = {key:('' if getattr(self,key) is None else getattr(self,key))
+                    for key in self.tags.keys()}
+        features['opinion_id'] = self.opinion_id
+        features['pros'] = self.pros
+        features['cons'] = self.cons
+        features['review_date'] = self.review_date
+        features['purchase_date'] = self.purchase_date
+        return features
+    
     def extract_opinion(self, opinion):
         for key, args in self.tags.items():
             setattr(self, key, extract_element(opinion, *args))   
@@ -97,12 +126,9 @@ class Opinion:
             self.purchase_date = dates.pop(0)["datetime"]
         except IndexError:
             self.purchase_date = None
+    
     def transform_opinion(self):
         self.purchased = (self.purchased=="Opinia potwierdzona zakupem")
         self.useful = int(self.useful)
         self.useless = int(self.useless)
         self.content = remove_whitespaces(self.content)
-
-product = Product("79688141")
-product.extract_product()
-print(product)

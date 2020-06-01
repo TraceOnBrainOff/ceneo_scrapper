@@ -43,8 +43,6 @@ product_id = input("Podaj kod produktu: ")
 opinions = pd.read_json("./opinions_json/"+product_id+'.json')  
 opinions = opinions.set_index("opinion_id") 
 
-opinions["stars"] = opinions["stars"].map(lambda x: float(x.split("/")[0].replace(",", ".")))
-
 #częstość występowania poszczególnej liczby gwiazdek
 stars = opinions["stars"].value_counts().sort_index().reindex(list(np.arange(0, 5.1, 0.5)), fill_value=0)
 fig, ax = plt.subplots()
